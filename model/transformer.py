@@ -19,14 +19,33 @@ class Transformer(nn.Module):
     def forward(self, inputs):
         x = self.doEmbedding(inputs)
         # x = self.posEncoding(x)
-        x, encoderKV = self.encoder(x) 
-        x = self.decoder(x, encoderKV) 
-        x = self.linear(x) 
-        x = self.softmax(x) # at this point, x is (or should be) a 1D tensor with the length of our output vocab. every value is the probability (all adding up to 1) of the element at the respective index being the next output. 
-        highest = 0
-        for i in range(len(x)):
-            highest = highest if x[i] <= x[highest] else i
-        return x, highest
+        _, encoderKV = self.encoder(x) #TODO try running the encoder output trough 2 additional linear layers to make the KV matrices
+        start_of_seq = 0
+        end_of_seq = -1
+        ret_sequence = []
+        ret_sequence.append(start_of_seq)
+        next_word = start_of_seq
+        while next_word != end_of_seq and len(ret_sequence) < TRANS_CONST['max_output_length']:            
+            x = self.doEmbedding(torch.tensor(ret_sequence).long())
+            # x = self.posEncoding(x)
+            x = self.decoder(x, encoderKV) 
+            x = self.linear(x) 
+            x = self.softmax(x) # at this point, x is (or should be) a 1D tensor with the length of our output vocab. every value is the probability (all adding up to 1) of the element at the respective index being the next output.
+            next_word = 0
+            x = x[len(x) - 1]
+            for i in range(len(x)):
+                next_word = next_word if x[i] <= x[next_word] else i
+            ret_sequence.append(next_word)
+        return ret_sequence
+
+    # def forward(self, inputs):
+    #     x = self.doEmbedding(inputs)
+    #     # x = self.posEncoding(x)
+    #     x, encoderKV = self.encoder(x) 
+    #     x = self.decoder(x, encoderKV) 
+    #     x = self.linear(x) 
+    #     x = self.softmax(x) # at this point, x is (or should be) a 1D tensor with the length of our output vocab. every value is the probability (all adding up to 1) of the element at the respective index being the next output.
+    #     return x
     
     def doEmbedding(self, inputs):
         x = []

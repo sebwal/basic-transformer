@@ -12,9 +12,11 @@ class Encoder(nn.Module):
 
     def forward(self, inputs):
         x = inputs
+        lastLayerKV = None
         for layer in self.encoderLayers:
             x = layer(x)
-        return x
+            lastLayerKV = layer.lastLayerKV
+        return x, lastLayerKV
 
 class EncoderLayer(nn.Module):
     def __init__(self, n_attention_heads):
@@ -24,11 +26,13 @@ class EncoderLayer(nn.Module):
         self.feedforward = FeedForward(ENCODER_CONST['ff1'], ENCODER_CONST['ff2'])
         self.norm1 = nn.LayerNorm(ENCODER_CONST['norm1_size'])
         self.norm2 = nn.LayerNorm(ENCODER_CONST['norm2_size'])
+        self.lastLayerKV = None
 
     def forward(self, inputs):
         x = inputs 
         z = x
         x = self.mhattention(x)
+        self.lastLayerKV = self.mhattention.lastHeadKV
         x = z + x
         x = self.norm1(x)
         z = x

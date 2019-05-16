@@ -1,13 +1,16 @@
 # Transformer (Top level)
 TRANS_CONST = {
-    'n_attention_layers': 1,
+    'n_attention_layers': 8,
     'n_attention_heads': 8,    
+    
     'embedding_dic_size': 1000,#TODO 
     'embedded_vec_size': 512,#TODO
+    
     'pos_encoding_input': 512,#TODO
     'pos_encoding_output': 512,#TODO
-    'linear_input': 512,#TODO
-    'linear_output': 1#TODO
+    
+    'linear_input': 512,
+    'linear_output': 512
 }
 
 # Encoder, EncoderLayer
@@ -22,8 +25,10 @@ ENCODER_CONST = {
 
 # Decoder, DecoderLayer
 DECODER_CONST = {
-    'norm1_size': ENCODER_CONST['norm1_size'],
-    'norm2_size': ENCODER_CONST['norm2_size'],
+    'norm1_size': 512, # same as input matrix width
+    'norm2_size': 512,
+    'norm3_size': 512,
+
     'ff1': ENCODER_CONST['ff1'],#TODO RENAME
     'ff2': ENCODER_CONST['ff2']#TODO RENAME
 }

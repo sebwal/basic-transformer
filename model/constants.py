@@ -12,7 +12,7 @@ TRANS_CONST = {
 
 # Encoder, EncoderLayer
 ENCODER_CONST = {
-    'norm1_size': 1,#TODO
+    'norm1_size': 512, # same as input matrix width
     'norm2_size': 1,#TODO
     'ff1': 1,#TODO, also RENAME
     'ff2': 1#TODO, also RENAME
@@ -29,7 +29,7 @@ DECODER_CONST = {
 # MultiHeadAttention, SingleHeadAttention
 ATTENTION_CONST = {
     'mh_concat_width': 64*8, # single head attention width * number of heads
-    'mh_output_width': 64, #TODO - I'm just guessing this. Didn't see in illustrated transformer
+    'mh_output_width': 512, #TODO - I'm just guessing this. Didn't see in illustrated transformer. Since we have to use this for the add & norm layer though it has to be the same as the input width (I think)
 
     # W_q weight matrix 
     'sh_linear1_input': 512, # same as embedded length to end up with n_words x 64
@@ -46,5 +46,6 @@ ATTENTION_CONST = {
 
 # FeedForward
 FEEDFORWARD_CONST = {
+    'dropout': 0.1
 }
 

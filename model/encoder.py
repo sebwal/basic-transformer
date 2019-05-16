@@ -33,9 +33,7 @@ class EncoderLayer(nn.Module):
         x = self.norm1(x)
         z = x
         x = self.feedforward(x)
-        print('enc layer ff out / norm2 in', x.shape)
         x = z + x
         x = self.norm2(x) 
-        print('enc layer norm2 out', x.shape)
         return x
 

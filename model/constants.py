@@ -13,9 +13,11 @@ TRANS_CONST = {
 # Encoder, EncoderLayer
 ENCODER_CONST = {
     'norm1_size': 512, # same as input matrix width
-    'norm2_size': 1,#TODO
-    'ff1': 1,#TODO, also RENAME
-    'ff2': 1#TODO, also RENAME
+    'norm2_size': 512,
+
+    # maybe rename these two, it's just for knowing the input dim and the dim that the FF layer will work with
+    'ff1': 512, 
+    'ff2': 64
 }
 
 # Decoder, DecoderLayer

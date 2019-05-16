@@ -22,8 +22,11 @@ class Transformer(nn.Module):
         x, encoderKV = self.encoder(x) 
         x = self.decoder(x, encoderKV) 
         x = self.linear(x) 
-        x = self.softmax(x) 
-        return x
+        x = self.softmax(x) # at this point, x is (or should be) a 1D tensor with the length of our output vocab. every value is the probability (all adding up to 1) of the element at the respective index being the next output. 
+        highest = 0
+        for i in range(len(x)):
+            highest = highest if x[i] <= x[highest] else i
+        return x, highest
     
     def doEmbedding(self, inputs):
         x = []

@@ -13,7 +13,7 @@ class Encoder(nn.Module):
     def forward(self, inputs):
         x = inputs
         for layer in self.encoderLayers:
-            x = layer(x) # shape_in = , shape_out = 
+            x = layer(x)
         return x
 
 class EncoderLayer(nn.Module):
@@ -28,15 +28,14 @@ class EncoderLayer(nn.Module):
     def forward(self, inputs):
         x = inputs 
         z = x
-        print('enc layer mhattention in', x.shape)
-        x = self.mhattention(x) # shape_in = , shape_out = 
-        print('enc layer mh attention out / norm1 in', x.shape)
-        x = self.norm1(z + x) # shape_in = , shape_out = 
-        print('enc layer norm1 out / ff in', x.shape)
+        x = self.mhattention(x)
+        x = z + x
+        x = self.norm1(x)
         z = x
-        x = self.feedforward(x) # shape_in = , shape_out = 
+        x = self.feedforward(x)
         print('enc layer ff out / norm2 in', x.shape)
-        x = self.norm2(z + x) # shape_in = , shape_out = 
+        x = z + x
+        x = self.norm2(x) 
         print('enc layer norm2 out', x.shape)
         return x
 

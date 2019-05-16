@@ -9,21 +9,16 @@ class MultiHeadAttention(nn.Module):
 
         self.masked = masked
         self.attentionHeads = nn.ModuleList([SingleHeadAttention(masked) for _ in range(n_heads)])
-        self.linear1 = nn.Linear(ATTENTION_CONST['mh_concat_width'], ATTENTION_CONST['mh_output_width'])
-        self.linear2 = nn.Linear(ATTENTION_CONST['mh_linear2_input'], ATTENTION_CONST['mh_linear2_output'])
+        self.linear = nn.Linear(ATTENTION_CONST['mh_concat_width'], ATTENTION_CONST['mh_output_width'])
 
     def forward(self, inputs, encoderOutput=None):
         x = []
-        print('attention head in', inputs.shape)
-        for head in self.attentionHeads: x.append(head(inputs, encoderOutput=encoderOutput)) # shape_in = , shape_out = 
-        print('attention head out / concat in', x)
-        x = self.concat(x)
-        print('concat out / linear2 in', x[0].shape)        
-        x = self.linear2(x) # shape_in = , shape_out = 
+        for head in self.attentionHeads:
+            sh_attention = head(inputs, encoderOutput=encoderOutput) 
+            x.append(sh_attention)
+        x = torch.cat(x, 1) # concatinate all single head attention outputs
+        x = self.linear(x) # matmul with weight matrix (linear layer) to get 10x64 shape
         return x
-
-    def concat(self, matrices):
-        return self.linear1(torch.cat(matrices, 1)) # shape_in = , shape_out = 
 
 class SingleHeadAttention(nn.Module):
     def __init__(self, masked):
@@ -36,19 +31,15 @@ class SingleHeadAttention(nn.Module):
         self.softmax = nn.Softmax()
 
     def forward(self, inputs, encoderOutput=None):        
-        q = self.linear1(inputs) # shape_in = , shape_out = 
-        #TODO very unsure about this next part
-        k = self.linear2(inputs) if encoderOutput == None else self.linear2(encoderOutput) # shape_in = , shape_out = 
-        v = self.linear3(inputs) if encoderOutput == None else self.linear3(encoderOutput) # shape_in = , shape_out = 
-        q = q.squeeze()
-        k = k.squeeze()
-        v = v.squeeze()
-        x = torch.dot(q, k) # shape_in = , shape_out = 
-        x = x * self.scale # shape_in = , shape_out = 
+        q = self.linear1(inputs)
+        k = self.linear2(inputs) if encoderOutput == None else self.linear2(encoderOutput)
+        v = self.linear3(inputs) if encoderOutput == None else self.linear3(encoderOutput)
+        x = torch.matmul(q, k.permute(1, 0)) 
+        x = x * self.scale
         # if self.masked:
         #     # TODO "future positions" have to be set to -inf. this is for the decoder to only allow self attention to consider earlier positions.
-        x = self.softmax(x) # shape_in = , shape_out = 
-        x = torch.dot(x, v) # shape_in = , shape_out = 
+        x = self.softmax(x) 
+        x = torch.matmul(x, v)
         return x
 
 

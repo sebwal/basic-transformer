@@ -1,7 +1,7 @@
 # Transformer (Top level)
 TRANS_CONST = {
     'n_attention_layers': 1,
-    'n_attention_heads': 1,    
+    'n_attention_heads': 8,    
     'embedding_dic_size': 1000,#TODO 
     'embedded_vec_size': 512,#TODO
     'pos_encoding_input': 512,#TODO
@@ -28,19 +28,17 @@ DECODER_CONST = {
 
 # MultiHeadAttention, SingleHeadAttention
 ATTENTION_CONST = {
-    'mh_concat_width': 1,#TODO
-    'mh_output_width': 1,#TODO 
-    'mh_linear2_input': 512,#TODO
-    'mh_linear2_output': 1,#TODO
+    'mh_concat_width': 64*8, # single head attention width * number of heads
+    'mh_output_width': 64, #TODO - I'm just guessing this. Didn't see in illustrated transformer
 
     # W_q weight matrix 
-    'sh_linear1_input': 10, # length of input phrase, aka amount of words
+    'sh_linear1_input': 512, # same as embedded length to end up with n_words x 64
     'sh_linear1_output': 64, # specified in the paper
     # W_k weight matrix 
-    'sh_linear2_input': 10, # length of input phrase, aka amount of words
+    'sh_linear2_input': 512, # same as embedded length to end up with n_words x 64
     'sh_linear2_output': 64, # specified in the paper
     # W_v weight matrix 
-    'sh_linear3_input': 10, # length of input phrase, aka amount of words
+    'sh_linear3_input': 512, # same as embedded length to end up with n_words x 64
     'sh_linear3_output': 64, # specified in the paper
     
     'sh_scale_factor': 1/8 # specified in the paper, square root of dimension of key vector/matrix (64)

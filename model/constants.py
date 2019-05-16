@@ -32,13 +32,18 @@ ATTENTION_CONST = {
     'mh_output_width': 1,#TODO 
     'mh_linear2_input': 512,#TODO
     'mh_linear2_output': 1,#TODO
-    'sh_linear1_input': 512,#TODO
-    'sh_linear1_output': 1,#TODO
-    'sh_linear2_input': 512,#TODO
-    'sh_linear2_output': 1,#TODO
-    'sh_linear3_input': 512,#TODO
-    'sh_linear3_output': 1,#TODO
-    'sh_scale_factor': 1/8
+
+    # W_q weight matrix 
+    'sh_linear1_input': 10, # length of input phrase, aka amount of words
+    'sh_linear1_output': 64, # specified in the paper
+    # W_k weight matrix 
+    'sh_linear2_input': 10, # length of input phrase, aka amount of words
+    'sh_linear2_output': 64, # specified in the paper
+    # W_v weight matrix 
+    'sh_linear3_input': 10, # length of input phrase, aka amount of words
+    'sh_linear3_output': 64, # specified in the paper
+    
+    'sh_scale_factor': 1/8 # specified in the paper, square root of dimension of key vector/matrix (64)
 }
 
 # FeedForward

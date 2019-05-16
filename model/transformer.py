@@ -17,15 +17,14 @@ class Transformer(nn.Module):
         self.softmax = nn.Softmax()
 
     def forward(self, inputs):
-        x = self.doEmbedding(inputs) # shape_in = 1 x n_words, shape_out = n_words x length_embedding_vector
-        # x = self.posEncoding(x) # no change in shape
-        x = self.encoder(x) # shape_in = n_words x 512 (--> length of embedding), shape_out = 
-        print('encoder out / decoder in', x.shape)
-        x = self.decoder(x) # shape_in = , shape_out = 
+        x = self.doEmbedding(inputs)
+        # x = self.posEncoding(x)
+        x = self.encoder(x) 
+        x = self.decoder(x) 
         print('decoder out / trans linear in', x.shape)
-        x = self.linear(x) # shape_in = , shape_out = 
+        x = self.linear(x) 
         print('trans linear out / softmax in', x.shape)
-        x = self.softmax(x) # shape_in = , shape_out = 
+        x = self.softmax(x) 
         print('trans softmax out', x.shape)
         return x
     

@@ -2,7 +2,7 @@ import math
 
 GLOBAL = {
     'embedded_length': 512,
-    'continuity_length': 64
+    'continuity_length': 64,
 }
 
 # Transformer (Top level)
@@ -17,7 +17,7 @@ TRANS_CONST = {
     # 'pos_encoding_output': GLOBAL['embedded_length'],
     
     'linear_input': GLOBAL['embedded_length'],
-    'linear_output': GLOBAL['embedded_length']
+    'linear_output': 1000 # output vocab size
 }
 
 # Encoder, EncoderLayer

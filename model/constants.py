@@ -9,6 +9,8 @@ GLOBAL = {
 TRANS_CONST = {
     'n_attention_layers': 8,
     'n_attention_heads': 8,    
+
+    'max_output_length': 10,
     
     'embedding_dic_size': 1000,#TODO 
     'embedded_vec_size': GLOBAL['embedded_length'],
@@ -27,7 +29,7 @@ ENCODER_CONST = {
 
     # maybe rename these two, it's just for knowing the input dim and the dim that the FF layer will work with
     'ff1': GLOBAL['embedded_length'], 
-    'ff2': GLOBAL['continuity_length']
+    'ff2': GLOBAL['embedded_length'] * 4
 }
 
 # Decoder, DecoderLayer
@@ -37,7 +39,7 @@ DECODER_CONST = {
     'norm3_size': GLOBAL['embedded_length'],
 
     'ff1': GLOBAL['embedded_length'],#TODO RENAME
-    'ff2': GLOBAL['continuity_length']#TODO RENAME
+    'ff2': GLOBAL['embedded_length'] * 4#TODO RENAME
 }
 
 # MultiHeadAttention, SingleHeadAttention
@@ -55,7 +57,7 @@ ATTENTION_CONST = {
     'sh_linear3_input': GLOBAL['embedded_length'], # same as embedded length to end up with n_words x 64
     'sh_linear3_output': GLOBAL['continuity_length'], # specified in the paper
     
-    'sh_scale_factor': 1/math.sqrt(GLOBAL['continuity_length']) # specified in the paper, square root of dimension of key vector/matrix (64)
+    'sh_scale_factor': math.sqrt(GLOBAL['continuity_length']) # specified in the paper, square root of dimension of key vector/matrix (64)
 }
 
 # FeedForward

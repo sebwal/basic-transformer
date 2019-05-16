@@ -32,17 +32,20 @@ class DecoderLayer(nn.Module):
         print('dec layer mhattention_masked in', x.shape)
         x = self.mhattention_masked(x) # shape_in = , shape_out = 
         print('dec layer mhattention_masked out / norm1 in', x.shape)
-        x = self.norm1(z + x) # shape_in = , shape_out = 
+        x = z + x
+        x = self.norm1(x)
         print('dec layer norm1 out / mhattention in', x.shape)
         z = x
         x = self.mhattention(x, encoderOutput) # shape_in = , shape_out = 
         print('dec layer mhattention out / norm2 in', x.shape)
-        x = self.norm2(z + x) # shape_in = , shape_out = 
+        x = z + x
+        x = self.norm2(x)
         print('dec layer norm2 out / ff in', x.shape)
         z = x
         x = self.feedforward(x) # shape_in = , shape_out = 
         print('dec layer ff out / norm3 in', x.shape)
-        x = self.norm3(z + x) # shape_in = , shape_out = 
+        x = z + x
+        x = self.norm3(x)
         print('dec layer norm3 out', x.shape)
         return x
 

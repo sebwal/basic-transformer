@@ -37,15 +37,6 @@ class Transformer(nn.Module):
                 next_word = next_word if x[i] <= x[next_word] else i
             ret_sequence.append(next_word)
         return ret_sequence
-
-    # def forward(self, inputs):
-    #     x = self.doEmbedding(inputs)
-    #     # x = self.posEncoding(x)
-    #     x, encoderKV = self.encoder(x) 
-    #     x = self.decoder(x, encoderKV) 
-    #     x = self.linear(x) 
-    #     x = self.softmax(x) # at this point, x is (or should be) a 1D tensor with the length of our output vocab. every value is the probability (all adding up to 1) of the element at the respective index being the next output.
-    #     return x
     
     def doEmbedding(self, inputs):
         x = []

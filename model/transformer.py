@@ -16,6 +16,13 @@ class Transformer(nn.Module):
         self.linear = nn.Linear(TRANS_CONST['linear_input'], TRANS_CONST['linear_output'])
         self.softmax = nn.Softmax(dim=1)
 
+    def __call__(self):
+        import random
+        inputs = []
+        for _ in range(13): inputs.append(random.randint(0, 26))
+        # return self.forward(nn.Parameter(torch.Tensor(inputs), requires_grad=True).long())
+        return self.forward(torch.Tensor(inputs).long())
+
     def forward(self, inputs):
         x = self.doEmbedding(inputs)
         # x = self.posEncoding(x)

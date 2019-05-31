@@ -3,6 +3,7 @@ import math
 GLOBAL = {
     'embedded_length': 512,
     'continuity_length': 64,
+    'n_vocab': 26
 }
 
 # Transformer (Top level)
@@ -12,14 +13,14 @@ TRANS_CONST = {
 
     'max_output_length': 10,
     
-    'embedding_dic_size': 1000,#TODO 
+    'embedding_dic_size': GLOBAL['n_vocab'], 
     'embedded_vec_size': GLOBAL['embedded_length'],
     
     # 'pos_encoding_input': GLOBAL['embedded_length'],
     # 'pos_encoding_output': GLOBAL['embedded_length'],
     
     'linear_input': GLOBAL['embedded_length'],
-    'linear_output': 1000 # output vocab size
+    'linear_output': GLOBAL['n_vocab'] # output vocab size
 }
 
 # Encoder, EncoderLayer

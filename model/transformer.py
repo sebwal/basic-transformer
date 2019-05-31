@@ -1,6 +1,6 @@
 from model.encoder import Encoder
 from model.decoder import Decoder
-from model.constants import TRANS_CONST
+from model.constants import TRANS_CONST, GLOBAL
 
 import torch
 import torch.nn as nn
@@ -37,7 +37,9 @@ class Transformer(nn.Module):
         _, encoderKV = self.encoder(x) #TODO try running the encoder output trough 2 additional linear layers to make the KV matrices
 
         #### DECODING ####
-        x = torch.Tensor([[1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 ,0 ,0, 0 ,0 ,0 ,0 ,0]])
+        sos = numpy.zeros(GLOBAL['n_vocab'])
+        sos[0] = 1
+        x = torch.Tensor([sos])
         while len(x) < TRANS_CONST['max_output_length']: #TODO add eos token
             ## Embedding
             x_embedded = self.doEmbedding(x)
@@ -54,3 +56,9 @@ class Transformer(nn.Module):
     def doEmbedding(self, inputs):
         inputs = inputs.nonzero()[:, 1] # this gets all indices of nonzero values from the inputs matrix
         return self.embedding(inputs)
+
+
+
+
+
+

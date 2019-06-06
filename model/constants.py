@@ -3,7 +3,7 @@ import math
 GLOBAL = {
     'embedded_length': 512,
     'continuity_length': 64,
-    'n_vocab': 26
+    'n_vocab': 29
 }
 
 # Transformer (Top level)
@@ -11,7 +11,7 @@ TRANS_CONST = {
     'n_attention_layers': 8,
     'n_attention_heads': 8,    
 
-    'max_output_length': 10,
+    'max_output_length': 6,
     
     'embedding_dic_size': GLOBAL['n_vocab'], 
     'embedded_vec_size': GLOBAL['embedded_length'],

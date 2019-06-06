@@ -40,12 +40,13 @@ class Transformer(nn.Module):
         sos = numpy.zeros(GLOBAL['n_vocab'])
         sos[0] = 1
         x = torch.Tensor([sos])
+        x_embedded = self.doEmbedding(x)
         while len(x) < TRANS_CONST['max_output_length']: #TODO add eos token
             ## Embedding
-            x_embedded = self.doEmbedding(x)
             # x_embedded = self.posEncoding(x_embedded) #TODO
             ## Decoding
             new_word = self.decoder(x_embedded, encoderKV)
+            print(new_word)
             new_word = self.linear(new_word)
             new_word = self.softmax(new_word)
             # new_word = new_word.long()

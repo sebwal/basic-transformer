@@ -26,37 +26,22 @@ class Transformer(nn.Module):
         for _ in range(13): inputs.append(numpy.zeros(26)) # 26 is vocab size, should be constant; 13 is just a random amount of words in the sequence
         inputs = torch.Tensor(inputs)
         for i in inputs: i[random.randint(0, len(i) - 1)] = 1
+
         return self.forward(inputs.long())
 
     def forward(self, inputs):
-        # TODO FIRST PRIO
-            # get all inputs for embedding (real example for translation tasks etc, noise, decoder input) on the same format, which should be NxV
-        #### ENCODING ####
         x = self.doEmbedding(inputs)
-        # x = self.posEncoding(x)
-        _, encoderKV = self.encoder(x) #TODO try running the encoder output trough 2 additional linear layers to make the KV matrices
-
-        #### DECODING ####
-        sos = numpy.zeros(GLOBAL['n_vocab'])
-        sos[0] = 1
-        x = torch.Tensor([sos])
-        x_embedded = self.doEmbedding(x)
-        while len(x) < TRANS_CONST['max_output_length']: #TODO add eos token
-            ## Embedding
-            # x_embedded = self.posEncoding(x_embedded) #TODO
-            ## Decoding
-            new_word = self.decoder(x_embedded, encoderKV)
-            print(new_word)
-            new_word = self.linear(new_word)
-            new_word = self.softmax(new_word)
-            # new_word = new_word.long()
-            x = torch.cat([x, new_word], dim=0)
-
-        return x
+        x = self.encoder(x)
+        x, weights = self.decoder(x)
+        x = self.linear(x)
+        x = self.softmax(x)
+        return x, weights
 
     def doEmbedding(self, inputs):
-        inputs = inputs.nonzero()[:, 1] # this gets all indices of nonzero values from the inputs matrix
-        return self.embedding(inputs)
+        x = inputs.nonzero()[:, 1] # this gets all indices of nonzero values from the inputs matrix
+        x = self.embedding(x)
+        # x = self.posEncoding(x)
+        return x
 
 
 

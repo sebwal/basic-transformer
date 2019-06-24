@@ -1,50 +1,50 @@
+# import numpy as np
+# import torch
+import torch.nn as nn
+# import torch.nn.functional as F
+# import math, copy, time
+# from torch.autograd import Variable
 from model.encoder import Encoder
 from model.decoder import Decoder
-from model.constants import TRANS_CONST, GLOBAL
+from model.embeddings import Embeddings
+from model.positional_encoding import PositionalEncoding
 
-import torch
-import torch.nn as nn
-import numpy
 
 class Transformer(nn.Module):
-    def __init__(self, n_layers=TRANS_CONST['n_attention_layers'], n_attention_heads=TRANS_CONST['n_attention_heads']):
+    def __init__(self, src_vocab, tgt_vocab, n_layers=6, n_heads=8):
         super(Transformer, self).__init__()
 
-        self.encoder = Encoder(n_layers, n_attention_heads)
-        self.decoder = Decoder(n_layers, n_attention_heads)
-        self.embedding = nn.Embedding(TRANS_CONST['embedding_dic_size'], TRANS_CONST['embedded_vec_size'])
-        # self.posEncoding = #TODO
-        self.linear = nn.Linear(TRANS_CONST['linear_input'], TRANS_CONST['linear_output'])
-        self.softmax = nn.Softmax(dim=1)
+        self.encoder = Encoder(n_layers, n_heads)
+        self.decoder = Decoder(n_layers, n_heads)
+        self.src_embed = nn.Sequential(Embeddings(512, src_vocab), PositionalEncoding(512, 0.1))
+        self.tgt_embed = nn.Sequential(Embeddings(512, tgt_vocab), PositionalEncoding(512, 0.1))
+        self.proj = nn.Linear(512, tgt_vocab)
+        
+        for p in self.parameters():
+            if p.dim() > 1:
+                nn.init.xavier_uniform(p)
 
-    def __call__(self, inputs=None):
-        if inputs != None: 
-            raise NotImplementedError
-
-        import random
-        inputs = []
-        for _ in range(13): inputs.append(numpy.zeros(26)) # 26 is vocab size, should be constant; 13 is just a random amount of words in the sequence
-        inputs = torch.Tensor(inputs)
-        for i in inputs: i[random.randint(0, len(i) - 1)] = 1
-
-        return self.forward(inputs.long())
-
-    def forward(self, inputs):
-        x = self.doEmbedding(inputs)
-        x = self.encoder(x)
-        x, weights = self.decoder(x)
-        x = self.linear(x)
-        x = self.softmax(x)
-        return x, weights
-
-    def doEmbedding(self, inputs):
-        x = inputs.nonzero()[:, 1] # this gets all indices of nonzero values from the inputs matrix
-        x = self.embedding(x)
-        # x = self.posEncoding(x)
+    def forward(self, src, tgt, src_mask, tgt_mask):
+        x = self.encoder(self.src_embed(src), src_mask)
+        x = self.decoder(self.tgt_embed(tgt), x, src_mask, tgt_mask)
+        x = self.finalize_output(x)
         return x
-
-
-
-
-
-
+    
+    def greedy_decode(self, src, src_mask, max_len, start_symbol):
+        encoderOut = self.encoder(self.src_embed(src), src_mask)
+        ys = torch.ones(1, 1).fill_(start_symbol).type_as(src.data)
+        for i in range(max_len-1):
+            tgt = Variable(ys)
+            tgt_mask = Variable(subsequent_mask(ys.size(1)).type_as(src.data))
+            out = self.decoder(self.tgt_embed(tgt), encoderOut, src_mask, tgt_mask) 
+            prob = self.finalize_output(out[:, -1])
+            _, next_word = torch.max(prob, dim = 1)
+            next_word = next_word.data[0]
+            ys = torch.cat([ys, 
+                            torch.ones(1, 1).type_as(src.data).fill_(next_word)], dim=1)
+        return ys    
+    
+    def finalize_output(self, inputs): 
+        x = F.log_softmax(self.proj(inputs), dim=-1)
+        return x
+    

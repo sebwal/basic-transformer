@@ -1,34 +1,47 @@
-from model.constants import ATTENTION_CONST
-
-import torch
 import torch.nn as nn
+import copy
 
 class MultiHeadAttention(nn.Module):
-    def __init__(self, n_heads):
+    def __init__(self, h, d_model=512, dropout=0.1):
+        "Take in model size and number of heads."
         super(MultiHeadAttention, self).__init__()
-
-        self.linear = nn.Linear(ATTENTION_CONST['mh_concat_width'], ATTENTION_CONST['mh_output_width'])
-        self.wQ = nn.Linear(ATTENTION_CONST['sh_linear1_input'], ATTENTION_CONST['sh_linear1_output'])
-        self.wK = nn.Linear(ATTENTION_CONST['sh_linear2_input'], ATTENTION_CONST['sh_linear2_output'])
-        self.wV = nn.Linear(ATTENTION_CONST['sh_linear3_input'], ATTENTION_CONST['sh_linear3_output'])
-
-    def forward(self, q, k, v):
-        q = self.wQ(q)
-        k = self.wK(k)
-        v = self.wV(v)
-
-        # split heads - I think they do this instead of a loop
-        x, attention_weights = self.applyHeads(q, k, v)
-        # transpose ?
-        # reshape ?
-        x = self.linear(x)
-        return x, attention_weights
-
-    def applyHeads(self, q, k, v, mask=None):
-        x = torch.matmul(q, k.permute(1, 0)) 
-        # scale x
-        # add mask
-        attention_weights = nn.Softmax(dim=-1)(x)
-        x = torch.matmul(attention_weights, v)
-        return x, attention_weights
-
+        assert d_model % h == 0
+        # We assume d_v always equals d_k
+        self.d_k = d_model // h
+        self.h = h
+        self.linears = nn.ModuleList([copy.deepcopy(nn.Linear(d_model, d_model)) for _ in range(4)])
+        self.attn = None
+        self.dropout = nn.Dropout(p=dropout)
+        
+    def forward(self, query, key, value, mask=None):
+        "Implements Figure 2"
+        if mask is not None:
+            # Same mask applied to all h heads.
+            mask = mask.unsqueeze(1)
+        nbatches = query.size(0)
+        
+        # 1) Do all the linear projections in batch from d_model => h x d_k 
+        query, key, value = \
+            [l(x).view(nbatches, -1, self.h, self.d_k).transpose(1, 2)
+             for l, x in zip(self.linears, (query, key, value))]
+        
+        # 2) Apply attention on all the projected vectors in batch. 
+        x, self.attn = self.attention(query, key, value, mask=mask, 
+                                 dropout=self.dropout)
+        
+        # 3) "Concat" using a view and apply a final linear. 
+        x = x.transpose(1, 2).contiguous() \
+             .view(nbatches, -1, self.h * self.d_k)
+        return self.linears[-1](x)
+    
+    def attention(self, query, key, value, mask=None, dropout=None):
+        "Compute 'Scaled Dot Product Attention'"
+        d_k = query.size(-1)
+        scores = torch.matmul(query, key.transpose(-2, -1)) \
+                 / math.sqrt(d_k)
+        if mask is not None:
+            scores = scores.masked_fill(mask == 0, -1e9)
+        p_attn = F.softmax(scores, dim = -1)
+        if dropout is not None:
+            p_attn = dropout(p_attn)
+        return torch.matmul(p_attn, value), p_attn

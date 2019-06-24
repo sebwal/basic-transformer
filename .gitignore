@@ -2,3 +2,6 @@
 **/__pycache__/**
 data/**
 .ipynb_checkpoints/**
+mnist_train/**
+events.out.tfevents*
+tensorboard_test/**
